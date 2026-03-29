@@ -13,12 +13,12 @@ import { getFirestore, collection, doc, setDoc, onSnapshot, addDoc, deleteDoc } 
 
 // 🔴 PEGA TUS LLAVES DE FIREBASE AQUÍ 🔴
 const firebaseConfig = {
-  apiKey: "AIzaSyD3ssDnJ_8oZGnas6K7QtkbW-UnAp2RGm4",
-  authDomain: "sapolab-farami.firebaseapp.com",
-  projectId: "sapolab-farami",
-  storageBucket: "sapolab-farami.firebasestorage.app",
-  messagingSenderId: "460402057258",
-  appId: "1:460402057258:web:0a820d62829a55a7b16353"
+apiKey: "AIzaSyD3ssDnJ_8oZGnas6K7QtkbW-UnAp2RGm4",
+authDomain: "sapolab-farami.firebaseapp.com",
+projectId: "sapolab-farami",
+storageBucket: "sapolab-farami.firebasestorage.app",
+messagingSenderId: "460402057258",
+appId: "1:460402057258:web:0a820d62829a55a7b16353"
 };
 
 const app = initializeApp(firebaseConfig);
