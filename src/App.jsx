@@ -11,14 +11,19 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, collection, doc, setDoc, onSnapshot, addDoc, deleteDoc } from 'firebase/firestore';
 
-const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-let app, auth, db;
-if (firebaseConfig) {
-  app = initializeApp(firebaseConfig);
-  auth = getAuth(app);
-  db = getFirestore(app);
-}
-const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+const firebaseConfig = {
+  apiKey: "AIzaSyD3ssDnJ_8oZGnas6K7QtkbW-UnAp2RGm4",
+  authDomain: "sapolab-farami.firebaseapp.com",
+  projectId: "sapolab-farami",
+  storageBucket: "sapolab-farami.firebasestorage.app",
+  messagingSenderId: "460402057258",
+  appId: "1:460402057258:web:0a820d62829a55a7b16353"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const appId = 'mi-sapolab-privado';
 
 // Base de datos completa solicitada
 const OIL_DATABASE = [
