@@ -4,20 +4,21 @@ import {
   Droplets, Beaker, Calendar, 
   Tag, StickyNote, ClipboardList, Printer,
   Percent, FlaskConical, AlertTriangle,
-  Save, History, BookOpen, Download
+  Save, History, BookOpen, Download, AlertCircle
 } from 'lucide-react';
 
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, collection, doc, setDoc, onSnapshot, addDoc, deleteDoc } from 'firebase/firestore';
 
+// 🔴 PEGA TUS LLAVES DE FIREBASE AQUÍ 🔴
 const firebaseConfig = {
-  apiKey: "AIzaSyD3ssDnJ_8oZGnas6K7QtkbW-UnAp2RGm4",
-  authDomain: "sapolab-farami.firebaseapp.com",
-  projectId: "sapolab-farami",
-  storageBucket: "sapolab-farami.firebasestorage.app",
-  messagingSenderId: "460402057258",
-  appId: "1:460402057258:web:0a820d62829a55a7b16353"
+  apiKey: "PEGAR_AQUI",
+  authDomain: "PEGAR_AQUI",
+  projectId: "PEGAR_AQUI",
+  storageBucket: "PEGAR_AQUI",
+  messagingSenderId: "PEGAR_AQUI",
+  appId: "PEGAR_AQUI"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -72,6 +73,7 @@ export default function App() {
   });
 
   const [user, setUser] = useState(null);
+  const [authErrorDetails, setAuthErrorDetails] = useState(null);
   const [savedRecipes, setSavedRecipes] = useState([]);
   const [priceHistory, setPriceHistory] = useState([]);
   const [showRecipesModal, setShowRecipesModal] = useState(false);
@@ -83,9 +85,10 @@ export default function App() {
     const initAuth = async () => {
       try {
         await signInAnonymously(auth);
+        setAuthErrorDetails(null);
       } catch (error) {
         console.error("Error Auth:", error);
-        showMessage("❌ Error de permisos: Revisa tu consola de Firebase");
+        setAuthErrorDetails(error.message);
       }
     };
     initAuth();
@@ -95,21 +98,28 @@ export default function App() {
 
   useEffect(() => {
     if (!user || !db) return;
-    const recipesRef = collection(db, 'artifacts', appId, 'users', user.uid, 'recipes');
-    const unsubRecipes = onSnapshot(recipesRef, (snap) => {
-      const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      data.sort((a, b) => new Date(b.date) - new Date(a.date));
-      setSavedRecipes(data);
-    }, err => console.error(err));
+    try {
+      const recipesRef = collection(db, 'artifacts', appId, 'users', user.uid, 'recipes');
+      const unsubRecipes = onSnapshot(recipesRef, (snap) => {
+        const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        data.sort((a, b) => new Date(b.date) - new Date(a.date));
+        setSavedRecipes(data);
+      }, err => {
+        console.error(err);
+        setAuthErrorDetails("Error leyendo base de datos: " + err.message);
+      });
 
-    const pricesRef = collection(db, 'artifacts', appId, 'users', user.uid, 'prices');
-    const unsubPrices = onSnapshot(pricesRef, (snap) => {
-      const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      data.sort((a, b) => new Date(b.date) - new Date(a.date));
-      setPriceHistory(data);
-    }, err => console.error(err));
+      const pricesRef = collection(db, 'artifacts', appId, 'users', user.uid, 'prices');
+      const unsubPrices = onSnapshot(pricesRef, (snap) => {
+        const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        data.sort((a, b) => new Date(b.date) - new Date(a.date));
+        setPriceHistory(data);
+      }, err => console.error(err));
 
-    return () => { unsubRecipes(); unsubPrices(); };
+      return () => { unsubRecipes(); unsubPrices(); };
+    } catch(e) {
+      console.error(e);
+    }
   }, [user]);
 
   const showMessage = (msg) => {
@@ -159,7 +169,10 @@ export default function App() {
         data: { recipe, additives, superfat, concentration, metadata, prices }
       });
       showMessage("✅ Receta guardada exitosamente.");
-    } catch (error) { showMessage("❌ Error al guardar receta."); }
+    } catch (error) { 
+      showMessage("❌ Error al guardar receta.");
+      setAuthErrorDetails(error.message);
+    }
   };
 
   const deleteRecipe = async (id) => {
@@ -239,6 +252,16 @@ export default function App() {
       {statusMessage && (
         <div className="fixed top-4 right-4 z-[60] bg-slate-800 text-white px-6 py-3 rounded-xl shadow-2xl font-bold print:hidden">
           {statusMessage}
+        </div>
+      )}
+
+      {/* DETECTOR DE ERRORES VISIBLE */}
+      {authErrorDetails && (
+        <div className="max-w-6xl mx-auto mb-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-sm print:hidden">
+          <div className="flex items-center gap-2 font-bold mb-1">
+            <AlertCircle size={20} /> ALERTA DE FIREBASE
+          </div>
+          <p className="text-sm font-mono">{authErrorDetails}</p>
         </div>
       )}
 
